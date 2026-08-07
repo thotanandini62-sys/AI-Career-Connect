@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Mistral AI Career Coach{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="margin-bottom: 2rem;">
+    <h2 style="font-family: var(--font-heading); margin-bottom: 0.5rem;">🤖 Mistral AI Career Coaching Suite</h2>
+    <p style="color: var(--text-muted);">Leverage advanced Mistral AI model capabilities, real-time speech-to-text, and audio synthesis for resume scoring and interview preparation.</p>
+</div>
+
+<!-- Tab Navigation -->
+<div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+    <button onclick="switchTab('resumeTab')" id="btn-resumeTab" class="btn btn-primary" style="font-size: 0.9rem;">📄 AI Resume Analyzer</button>
+    <button onclick="switchTab('interviewTab')" id="btn-interviewTab" class="btn btn-outline" style="font-size: 0.9rem;">🎙️ AI Mock Interviewer</button>
+</div>
+
+<!-- TAB 1: RESUME ANALYZER -->
+<div id="resumeTab" class="coaching-tab">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div class="glass-card">
+            <h3 style="font-family: var(--font-heading); margin-bottom: 1rem;">Upload or Paste Resume</h3>
+            <form id="resumeForm">
+                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Target Job Title</label>
+                <input type="text" id="targetRoleInput" class="form-control" value="{{ user.target_role or 'Senior AI Engineer' }}" required>
+
+                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Resume Content / Text</label>
+                <textarea id="resumeTextInput" class="form-control" rows="10" placeholder="Paste your resume work experience, skills, and summary here..." required>Experienced Backend Engineer with 3+ years in Python, Flask, SQLite, REST APIs, and System Design. Designed scalable microservices and integrated AI models.</textarea>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    🚀 Analyze Resume with Mistral AI
+                </button>
+            </form>
+        </div>
+
+        <div class="glass-card" id="resumeResultsCard">
+            <h3 style="font-family: var(--font-heading); margin-bottom: 1rem;">AI Evaluation Results</h3>
+            <div id="resumeAnalysisOutput" style="line-height: 1.6; font-size: 0.95rem; color: var(--text-muted);">
+                <p>Submit your resume details on the left to generate real-time Mistral AI feedback, score, and skill gap recommendations.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TAB 2: MOCK INTERVIEWER -->
+<div id="interviewTab" class="coaching-tab" style="display: none;">
+    <div class="glass-card" style="max-width: 800px; margin: 0 auto;">
+        <h3 style="font-family: var(--font-heading); margin-bottom: 1rem;">🎙️ Interactive Voice AI Mock Interview</h3>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <button onclick="generateNewQuestion()" class="btn btn-outline" style="margin-bottom: 1rem;">⚡ Generate Next Mistral Question</button>
+            <div id="interviewQuestionBox" style="padding: 1.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--accent-primary); border-radius: var(--border-radius-md); font-weight: 500;">
+                Click above to generate your technical interview question.
+            </div>
+        </div>
+
+        <!-- Answer section with Voice STT -->
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Your Answer (Type or record voice)</label>
+            <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 0.5rem;">
+                <button type="button" onclick="window.voiceApp.toggleRecording()" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                    🎙️ Record Voice Response
+                </button>
+                <span id="interviewMicStatus" style="font-size: 0.8rem; color: var(--accent-cyan);">Ready to listen</span>
+            </div>
+            <textarea id="userAnswerText" class="form-control" rows="4" placeholder="Speak into mic or type response here..."></textarea>
+        </div>
+
+        <button onclick="submitAnswerForEvaluation()" class="btn btn-primary" style="width: 100%; justify-content: center;">
+            Evaluate Answer & Hear Feedback (TTS)
+        </button>
+
+        <div id="interviewFeedbackBox" style="margin-top: 1.5rem; display: none; padding: 1rem; background: rgba(99, 102, 241, 0.1); border-radius: 8px;">
+            <!-- AI evaluation feedback pops up here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function switchTab(tabId) {
+    document.querySelectorAll('.coaching-tab').forEach(el => el.style.display = 'none');
+    document.getElementById(tabId).style.display = 'block';
+
+    document.getElementById('btn-resumeTab').className = tabId === 'resumeTab' ? 'btn btn-primary' : 'btn btn-outline';
+    document.getElementById('btn-interviewTab').className = tabId === 'interviewTab' ? 'btn btn-primary' : 'btn btn-outline';
+}
+
+// Resume Analyzer submit handler
+document.getElementById('resumeForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const role = document.getElementById('targetRoleInput').value;
+    const text = document.getElementById('resumeTextInput').value;
+
+    const outputDiv = document.getElementById('resumeAnalysisOutput');
+    outputDiv.innerHTML = '<p style="color: var(--accent-cyan);">Calling Mistral AI API for analysis...</p>';
+
+    try {
+        const response = await fetch('/ai-coaching/analyze-resume', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ target_role: role, resume_text: text })
+        });
+        const data = await response.json();
+        if (data.status === 'success') {
+            outputDiv.innerHTML = `<div style="white-space: pre-line;">${data.result.analysis}</div>`;
+            showToast('Resume evaluated by Mistral AI!', 'success');
+        }
+    } catch (err) {
+        outputDiv.innerHTML = '<p style="color: #ef4444;">Failed to connect to Mistral AI endpoint.</p>';
+    }
+});
+
+let currentQuestion = "";
+
+async function generateNewQuestion() {
+    const box = document.getElementById('interviewQuestionBox');
+    box.innerHTML = '<span style="color: var(--accent-cyan);">Generating interview question from Mistral...</span>';
+
+    try {
+        const res = await fetch('/ai-coaching/generate-question', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: 'Senior AI Engineer' })
+        });
+        const data = await res.json();
+        currentQuestion = data.question;
+        box.innerHTML = `<div style="white-space: pre-line;">${data.question}</div>`;
+        
+        // Speak question using TTS
+        speakText("Here is your interview question: " + data.question.slice(0, 150));
+    } catch (e) {
+        box.innerHTML = 'Can you explain how you design a scalable Flask backend service with SQLite and third-party AI APIs?';
+        currentQuestion = box.innerText;
+    }
+}
+
+async function submitAnswerForEvaluation() {
+    const answer = document.getElementById('userAnswerText').value;
+    if (!answer) {
+        showToast('Please type or record an answer first.', 'error');
+        return;
+    }
+
+    const feedbackBox = document.getElementById('interviewFeedbackBox');
+    feedbackBox.style.display = 'block';
+    feedbackBox.innerHTML = '<p style="color: var(--accent-cyan);">Mistral AI is scoring your response...</p>';
+
+    try {
+        const res = await fetch('/ai-coaching/evaluate-interview', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question: currentQuestion, user_answer: answer })
+        });
+        const data = await res.json();
+        feedbackBox.innerHTML = `
+            <h4 style="color: var(--accent-primary); margin-bottom: 0.5rem;">AI Response Score: ${data.score}/100</h4>
+            <div style="white-space: pre-line; font-size: 0.9rem;">${data.feedback}</div>
+        `;
+        showToast('Answer evaluated! Synthesizing voice feedback...', 'success');
+        
+        // Synthesize spoken voice feedback
+        speakText("Great effort! Your score is " + data.score + " out of 100. Keep focusing on backend scalability.");
+    } catch (e) {
+        feedbackBox.innerHTML = '<p style="color: #ef4444;">Error evaluating response.</p>';
+    }
+}
+</script>
+{% endblock %}

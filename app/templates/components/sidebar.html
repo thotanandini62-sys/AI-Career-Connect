@@ -1,0 +1,36 @@
+<!-- Sidebar Navigation Partial Component -->
+<aside class="sidebar">
+  <a href="{{ url_for('dashboard.index') }}" class="brand-logo">
+    <div class="brand-badge">🚀</div>
+    <span>AI Career Connect</span>
+  </a>
+
+  <ul class="nav-menu">
+    <li class="nav-item {% if request.endpoint and 'dashboard' in request.endpoint %}active{% endif %}">
+      <a href="{{ url_for('dashboard.index') }}">
+        <span>📊</span> Dynamic Dashboard
+      </a>
+    </li>
+    <li class="nav-item {% if request.endpoint and 'ai_coaching' in request.endpoint %}active{% endif %}">
+      <a href="{{ url_for('ai_coaching.index') }}">
+        <span>🤖</span> Mistral AI Coaching
+      </a>
+    </li>
+    <li class="nav-item {% if request.endpoint and 'profile' in request.endpoint %}active{% endif %}">
+      <a href="{{ url_for('auth.profile') }}">
+        <span>👤</span> Career Profile
+      </a>
+    </li>
+  </ul>
+
+  <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--glass-border);">
+    {% if current_user.is_authenticated %}
+      <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.9rem;">
+        <span style="color: var(--text-muted);">Log Out</span>
+        <a href="{{ url_for('auth.logout') }}" style="color: #ef4444; font-weight: 600; text-decoration: none;">Exit ➔</a>
+      </div>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}" class="btn btn-outline" style="width: 100%; justify-content: center;">Sign In</a>
+    {% endif %}
+  </div>
+</aside>

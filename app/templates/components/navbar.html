@@ -1,0 +1,16 @@
+<!-- Top Header Navigation Partial Component -->
+<header class="top-navbar">
+  <div class="navbar-title">
+    {% block page_title %}Dashboard Analytics{% endblock %}
+  </div>
+
+  <div class="user-profile-widget">
+    <div style="text-align: right; line-height: 1.2;">
+      <div style="font-weight: 600; color: #fff;">{{ current_user.full_name or current_user.username or 'John Doe' }}</div>
+      <div style="font-size: 0.8rem; color: var(--accent-cyan);">{{ current_user.target_role or 'Senior AI Engineer' }}</div>
+    </div>
+    <div class="user-avatar">
+      {{ (current_user.full_name or current_user.username or 'J')[0] | upper }}
+    </div>
+  </div>
+</header>

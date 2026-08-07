@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Dynamic Career Analytics{% endblock %}
+
+{% block content %}
+<!-- Metrics Cards Grid -->
+<div class="grid-metrics">
+    <div class="glass-card metric-card">
+        <div>
+            <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">RESUME SCORE</div>
+            <div class="metric-value">{{ metrics.get('resume_score', 84) }}/100</div>
+            <div style="font-size: 0.8rem; color: var(--accent-emerald); margin-top: 0.3rem;">↑ 8% from last analysis</div>
+        </div>
+        <div class="metric-icon" style="background: rgba(99, 102, 241, 0.2); color: var(--accent-primary);">📄</div>
+    </div>
+
+    <div class="glass-card metric-card">
+        <div>
+            <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">MOCK INTERVIEW READINESS</div>
+            <div class="metric-value">{{ metrics.get('avg_interview_score', 88) }}%</div>
+            <div style="font-size: 0.8rem; color: var(--accent-cyan); margin-top: 0.3rem;">Based on {{ metrics.get('mock_interviews_count', 3) }} sessions</div>
+        </div>
+        <div class="metric-icon" style="background: rgba(236, 72, 153, 0.2); color: var(--accent-secondary);">🎙️</div>
+    </div>
+
+    <div class="glass-card metric-card">
+        <div>
+            <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">ACTIVE GOALS</div>
+            <div class="metric-value">{{ metrics.get('goals_completed', 1) }}/{{ metrics.get('total_goals', 3) }}</div>
+            <div style="font-size: 0.8rem; color: var(--accent-amber); margin-top: 0.3rem;">In Progress</div>
+        </div>
+        <div class="metric-icon" style="background: rgba(245, 158, 11, 0.2); color: var(--accent-amber);">🎯</div>
+    </div>
+
+    <div class="glass-card metric-card">
+        <div>
+            <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">VOICE INTERACTIONS</div>
+            <div class="metric-value">{{ metrics.get('voice_interactions', 4) }}</div>
+            <div style="font-size: 0.8rem; color: var(--accent-emerald); margin-top: 0.3rem;">STT & TTS Sessions</div>
+        </div>
+        <div class="metric-icon" style="background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald);">🔊</div>
+    </div>
+</div>
+
+<!-- Dynamic Charts Grid -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+    <!-- Radar Chart -->
+    <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-family: var(--font-heading); font-size: 1.1rem;">Skill Gap vs Target Benchmark</h3>
+            <span style="font-size: 0.8rem; background: rgba(99, 102, 241, 0.2); padding: 0.25rem 0.6rem; border-radius: 20px; color: var(--accent-primary);">Mistral AI Match</span>
+        </div>
+        <div class="chart-container">
+            <canvas id="skillsRadarChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Line Chart -->
+    <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-family: var(--font-heading); font-size: 1.1rem;">Mock Interview Practice Progression</h3>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Weekly View</span>
+        </div>
+        <div class="chart-container">
+            <canvas id="scoreHistoryChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Voice STT / TTS Practice & Recent Logs -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+    <!-- Voice STT/TTS Quick Widget -->
+    <div class="glass-card voice-recorder-widget">
+        <h3 style="font-family: var(--font-heading); margin-bottom: 0.5rem;">🎙️ Voice Speech-to-Text Practice</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Record your interview response to convert voice to text and receive AI voice feedback.</p>
+        
+        <button id="micRecordBtn" class="mic-btn" title="Click to start/stop recording">🎙️</button>
+        <div id="voiceStatusText" style="font-size: 0.85rem; color: var(--accent-cyan); font-weight: 500; margin-bottom: 1rem;">Click mic to start speaking</div>
+
+        <textarea id="speechTranscriptionOutput" class="form-control" rows="3" placeholder="Transcribed speech text will appear here..."></textarea>
+        
+        <div style="display: flex; gap: 0.75rem; justify-content: center; margin-top: 0.5rem;">
+            <button onclick="speakText(document.getElementById('speechTranscriptionOutput').value)" class="btn btn-outline" style="font-size: 0.85rem;">
+                🔊 Play Audio Feedback (TTS)
+            </button>
+        </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="glass-card">
+        <h3 style="font-family: var(--font-heading); margin-bottom: 1rem;">📋 Recent AI Career Activities</h3>
+        
+        {% if recent_interviews %}
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for interview in recent_interviews %}
+                    <div style="padding: 0.85rem; background: rgba(15, 23, 42, 0.5); border-left: 3px solid var(--accent-primary); border-radius: 6px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.25rem;">
+                            <span style="font-weight: 600; color: #fff;">{{ interview.target_role }}</span>
+                            <span style="color: var(--accent-emerald);">Score: {{ interview.feedback_score }}/100</span>
+                        </div>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">"{{ interview.question[:90] }}..."</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: var(--text-muted);">No interview sessions recorded yet. Start practicing with Mistral AI!</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

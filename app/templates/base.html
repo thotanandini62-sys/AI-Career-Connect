@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Career Connect | Intelligent Career Coaching Platform{% endblock %}</title>
+    
+    <!-- Google Fonts & Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom Dark Glassmorphism CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        {% include 'components/sidebar.html' %}
+
+        <!-- Main Workspace -->
+        <div class="main-wrapper">
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+              <div class="navbar-title">
+                {% block page_title %}Dashboard Analytics{% endblock %}
+              </div>
+
+              <div class="user-profile-widget">
+                <div style="text-align: right; line-height: 1.2;">
+                  <div style="font-weight: 600; color: #fff;">{{ current_user.full_name or current_user.username or 'John Doe' }}</div>
+                  <div style="font-size: 0.8rem; color: var(--accent-cyan);">{{ current_user.target_role or 'Senior AI Engineer' }}</div>
+                </div>
+                <div class="user-avatar">
+                  {{ (current_user.full_name or current_user.username or 'J')[0] | upper }}
+                </div>
+              </div>
+            </header>
+
+            <!-- Flash Alert Notifications -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div style="padding: 1rem 2rem 0 2rem;">
+                  {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}" style="padding: 0.85rem 1.25rem; background: rgba(99, 102, 241, 0.2); border: 1px solid var(--accent-primary); border-radius: 8px; margin-bottom: 0.5rem;">
+                      {{ message }}
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+
+            <!-- Main Content Container -->
+            <main class="content-body">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/voice_recorder.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

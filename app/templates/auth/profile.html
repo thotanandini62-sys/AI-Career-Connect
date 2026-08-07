@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Career Profile & Skills{% endblock %}
+
+{% block content %}
+<div style="max-width: 650px; margin: 0 auto;" class="glass-card">
+    <h2 style="font-family: var(--font-heading); margin-bottom: 0.5rem;">👤 Career Profile & Preferences</h2>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Update your target role and skills so Mistral AI can personalize coaching recommendations.</p>
+
+    <form method="POST" action="{{ url_for('auth.profile') }}">
+        <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem;">Full Name</label>
+        <input type="text" name="full_name" class="form-control" value="{{ user.full_name or '' }}" required>
+
+        <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem;">Target Role</label>
+        <input type="text" name="target_role" class="form-control" value="{{ user.target_role or 'Software Engineer' }}" required>
+
+        <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem;">Key Skills (comma-separated)</label>
+        <input type="text" name="skills" class="form-control" value="{{ user.skills or 'Python, Flask, SQL, Mistral AI' }}">
+
+        <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem;">Experience Level</label>
+        <select name="experience_level" class="form-control">
+            <option value="Entry-Level (0-2 yrs)" {% if user.experience_level == 'Entry-Level (0-2 yrs)' %}selected{% endif %}>Entry-Level (0-2 yrs)</option>
+            <option value="Mid-Level (3-5 yrs)" {% if user.experience_level == 'Mid-Level (3-5 yrs)' or not user.experience_level %}selected{% endif %}>Mid-Level (3-5 yrs)</option>
+            <option value="Senior Lead (6+ yrs)" {% if user.experience_level == 'Senior Lead (6+ yrs)' %}selected{% endif %}>Senior Lead (6+ yrs)</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 1rem;">Save Profile Updates</button>
+    </form>
+</div>
+{% endblock %}
