@@ -87,3 +87,16 @@ If you see `5 passed`, everything is 100% healthy!
 - **To Stop the App**: Go back to your terminal window and press `Ctrl + C`.
 - **Where is my database?**: It's saved automatically inside `instance/app.db`.
 - **Where do audio files go?**: Speech files are stored in `app/static/uploads/`.
+
+---
+
+## 🌐 Deploying to Render
+
+To deploy this application to **Render**:
+
+1. Push your code to your GitHub / GitLab repository.
+2. Log into [Render Dashboard](https://dashboard.render.com/).
+3. Click **New +** → **Blueprint** and select your repository (Render auto-detects `render.yaml`).
+4. Set your `MISTRAL_API_KEY` in the environment settings and click **Apply**.
+5. Your application will be live with full WSGI support powered by `gunicorn`!
+
