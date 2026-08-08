@@ -1,0 +1,23 @@
+# Python virtual environments
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+
+# Flask / Instance directory
+instance/
+*.db
+*.sqlite3
+
+# Environment configuration
+.env
+
+# Uploaded & synthesized audio files
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
